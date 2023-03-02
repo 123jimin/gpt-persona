@@ -1,4 +1,4 @@
-# GPTPersona
+# gpt-persona
 
 ![npm](https://img.shields.io/npm/v/gpt-persona?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/123jimin/gpt-persona?style=flat-square)
