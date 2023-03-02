@@ -1,5 +1,8 @@
 # GPTPersona
 
+![npm](https://img.shields.io/npm/v/gpt-persona?style=flat-square)
+![GitHub](https://img.shields.io/github/license/123jimin/GPTPersona?style=flat-square)
+
 A helper library in TypeScript for easily using OpenAI Chat API.
 
 ```text
