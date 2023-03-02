@@ -2,10 +2,18 @@
 
 A helper library in TypeScript for easily using OpenAI Chat API.
 
+```text
+npm install gpt-persona
+```
+
+This library is not ready for production, but you may use this to experiment with a chatbot.
+
 This library includes two things:
 * A class `Persona` for managing different personas for OpenAI Chat API.
 * A thin wrapper `OpenAI` around OpenAI Chat API.
     * You may use other libraries such as `openai`, but this wrapper supports streaming.
+
+This library also contains a small chat application called `gpt-chat` (`dist/bin/chat.js`). Set the `OPENAI_API_KEY` environment variable with your OpenAI API key. 
 
 ## Example
 

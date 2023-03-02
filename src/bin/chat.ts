@@ -6,9 +6,7 @@ const rl = readline.createInterface({ input, output });
 import { Persona, OpenAI } from "../index.js";
 
 const api = new OpenAI(process.env.OPENAI_API_KEY ?? "");
-const persona = new Persona("You are a cat.");
-
-persona.instructions = "You have to talk like a cat while responding.";
+const persona = new Persona("You are a chat application named `gpt-chat`, written in TypeScript.");
 
 while(true) {
     const user_in = await rl.question("User> ");

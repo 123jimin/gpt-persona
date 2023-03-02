@@ -24,9 +24,12 @@
   },
   "keywords": [
     "chatgpt",
+    "gpt-3.5",
+    "gpt",
     "ai",
     "openai",
-    "persona"
+    "persona",
+    "chatbot"
   ],
   "author": "Jimin Park",
   "license": "MIT",
