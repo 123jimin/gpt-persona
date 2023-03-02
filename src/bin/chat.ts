@@ -60,7 +60,7 @@ try {
 }
 
 /* Main loop */
-const api = new OpenAI(api_key);
+const api = new OpenAI(api_key, {retry: {max_retries: 5}});
 const persona = new Persona(persona_def);
 
 main_loop: while(true) {

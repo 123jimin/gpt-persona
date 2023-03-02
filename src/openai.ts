@@ -1,7 +1,17 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import {createParser, type ParsedEvent, type ReconnectInterval} from 'eventsource-parser';
 
 import type * as types from "./types";
+
+export interface OpenAIConfig {
+    retry: Partial<{
+        initial_delay: number;
+        exponential_base: number;
+        jitter: number;
+        max_retries: number;
+    }>;
+}
 
 export interface ChatCompletionParams {
     model: string;
@@ -18,14 +28,45 @@ export interface ChatCompletionParams {
 }
 
 export class OpenAI {
+    private _client: ReturnType<typeof axios.create>;
+    private _config: Partial<OpenAIConfig> = {};
+
     key: string;
     
-    constructor(key: string) {
+    constructor(key: string, config: Partial<OpenAIConfig> = {}) {
+        this._client = axios.create({baseURL: "https://api.openai.com/"});
+
         this.key = key;
+        this.config = config;
+    }
+
+    get config(): Partial<OpenAIConfig> { return this._config; }
+    set config(in_config: Partial<OpenAIConfig>) {
+        this._config = in_config;
+
+        const config_retry = this._config.retry;
+        if(config_retry && config_retry.max_retries != null && config_retry.max_retries > 0) {
+            axiosRetry(this._client, {
+                retries: config_retry.max_retries,
+                retryCondition: (error): boolean => {
+                    if(error.code === 'ECONNABORTED') return false;
+                    if(!error.response) return true;
+                    if(500 <= error.response.status && error.response.status < 600) return true;
+                    if(error.response.status === 429) return true;
+                    return false;
+                },
+                retryDelay: (retryCount: number): number => {
+                    const initial_delay = config_retry.initial_delay ?? 500;
+                    const exponential_base = config_retry.exponential_base ?? 2;
+                    const jitter = config_retry.jitter ?? 0.5;
+                    return initial_delay * (exponential_base ** retryCount) * (1.0 + Math.random() * jitter);
+                }
+            });
+        }
     }
 
     async fetch<Response>(method: 'GET'|'POST', url: string, params: {[key: string]: unknown}): Promise<Response> {
-        const res = await axios({
+        const res = await this._client({
             method, url,
             responseType: 'json',
             headers: {
@@ -39,7 +80,7 @@ export class OpenAI {
     }
 
     async *stream<Delta>(method: 'GET'|'POST', url: string, params: {[key: string]: unknown}): AsyncGenerator<Delta> {
-        const res = await axios({
+        const res = await this._client({
             method, url,
             responseType: 'stream',
             headers: {
@@ -90,7 +131,7 @@ export class OpenAI {
             type Choice = types.Choice<{message: types.Message}>;
 
             const choices: (Choice|undefined)[] = [];
-            for await(const delta of this.stream<Delta>('POST', "https://api.openai.com/v1/chat/completions", req_params)) {
+            for await(const delta of this.stream<Delta>('POST', "/v1/chat/completions", req_params)) {
                 for(const choice of delta.choices) {
                     const {delta, index} = choice;
 
@@ -108,7 +149,7 @@ export class OpenAI {
         } else {
             type Response = types.ChoiceResponse<{message: types.Message}>;
 
-            return await this.fetch<Response>('POST', "https://api.openai.com/v1/chat/completions", req_params);
+            return await this.fetch<Response>('POST', "/v1/chat/completions", req_params);
         }
     }
 
