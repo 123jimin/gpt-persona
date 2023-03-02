@@ -1,6 +1,6 @@
 {
   "name": "gpt-persona",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Wrapper for ChatGPT API",
   "files": [
     "/dist"
@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/123jimin/gpt-persona#readme",
   "devDependencies": {
+    "@types/argparse": "^2.0.10",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
@@ -45,6 +46,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "argparse": "^2.0.1",
     "axios": "^1.3.4",
     "eventsource-parser": "^0.1.0",
     "gpt-3-encoder": "^1.1.4"

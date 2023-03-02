@@ -12,11 +12,12 @@ npm install gpt-persona
 This library is not ready for production, but you may use this to experiment with a chatbot.
 
 This library includes two things:
+
 * A class `Persona` for managing different personas for OpenAI Chat API.
 * A thin wrapper `OpenAI` around OpenAI Chat API.
-    * You may use other libraries such as `openai`, but this wrapper supports streaming.
+  * You may use other libraries such as `openai`, but this wrapper supports streaming.
 
-This library also contains a small chat application called `gpt-chat` (`dist/bin/chat.js`). Set the `OPENAI_API_KEY` environment variable with your OpenAI API key. 
+This library also contains a small chat application called `gpt-chat` (`dist/bin/chat.js`). Set the `OPENAI_API_KEY` environment variable with your OpenAI API key.
 
 ## Example
 
@@ -39,6 +40,31 @@ console.log(response);
 // Example response: "Good afternoon nya!"
 
 ```
+
+## `gpt-chat`
+
+```text
+usage: gpt-chat [-h] [-k KEY] [-p PERSONA_FILE]
+
+A simple client for OpenAI's Chat API.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -k KEY, --key KEY     API key for OpenAI. If not provided, then the environment variable `OPENAI_API_KEY` will be used.
+  -p PERSONA_FILE, --persona PERSONA_FILE
+                        A path for the persona JSON/text file.
+```
+
+You can use following commands:
+
+* `/quit`: Quit chatting.
+* `/persona`: Override the persona.
+* `/instruction`: Override the instruction.
+* `/reset`: Resets the history and persona.
+* `/clear`: Resets the history. Retains persona and instructions.
+* `/save`: Save current persona and history.
+
+Start your message with `//` if you want to put `/` at the beginning.
 
 ## API
 
@@ -80,14 +106,14 @@ Create a response given a message; it automatically rollbacks upon an error, so 
 * `api`
 * `message`
 * `options` (optional)
-    * An optional object with following optional fields.
-    * `options.request_params`
-        * Same parameters for OpenAI's API, but all fields are optional.
-    * `options.additional_instructions`
-        * Additional instructions to be provided.
-        * Consider it as one-time `persona.instruction`.
+  * An optional object with following optional fields.
+  * `options.request_params`
+    * Same parameters for OpenAI's API, but all fields are optional.
+  * `options.additional_instructions`
+    * Additional instructions to be provided.
+    * Consider it as one-time `persona.instruction`.
 * `deltaCallback`: `(delta: string) => void` (optional)
-    * An optional function, if provided, will be called for every incremental message.
+  * An optional function, if provided, will be called for every incremental message.
 
 Here's an example with streaming:
 
