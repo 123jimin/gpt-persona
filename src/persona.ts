@@ -107,7 +107,7 @@ export class Persona {
      * @param additional_instructions One-time additional instructions.
      * @returns A list of messages.
      */
-    getAPIMessage(additional_instructions: MessagesLike = []): types.Messages {
+    getAPIMessages(additional_instructions: MessagesLike = []): types.Messages {
         const additional_messages = toMessages('system', additional_instructions);
 
         const max_context_token_count = this.max_context_token_count;
@@ -181,7 +181,7 @@ export class Persona {
 
         try {
             this.pushMessage(message);
-            const res = await api.chatCompletion(this.getAPIMessage(options?.additional_instructions), options?.request_params, deltaCallback ? (msg, ind) => {
+            const res = await api.chatCompletion(this.getAPIMessages(options?.additional_instructions), options?.request_params, deltaCallback ? (msg, ind) => {
                 if(deltaCallback && ind === 0 && msg.content) deltaCallback(msg.content);
             } : void 0);
             res_str = this.pushResponse(res);
