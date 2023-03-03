@@ -53,7 +53,7 @@ try {
             } catch(e) {}
         }
 
-        persona_def = persona_file_json ?? persona_file_contents;
+        persona_def = persona_file_json ?? persona_file_contents.replace(/\r/g, '');
     }
 } catch(e) {
     if(e instanceof Error) console.error(e.stack);
