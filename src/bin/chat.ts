@@ -1,3 +1,5 @@
+#!/usr/bin/env node --no-warnings
+
 /* Parse arguments */
 import * as path from 'node:path';
 import { ArgumentParser } from 'argparse';
