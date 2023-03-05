@@ -14,7 +14,7 @@ function toMessages(default_role: types.Role, messages: MessagesLike): types.Mes
     return Array.isArray(messages) ? messages.map((x) => toMessage(default_role, x)) : [toMessage(default_role, messages)];
 }
 
-function countTokens(messages: MessagesLike): number {
+export function countTokens(messages: MessagesLike): number {
     if(Array.isArray(messages)) {
         return messages.length === 0 ? 0 : messages.map(countTokens).reduce((x, y) => x+y);
     } else {
@@ -27,6 +27,8 @@ export interface PersonaResponseOptions {
     request_params: Partial<ChatCompletionParams>,
     /** One-time additional instructions. */
     additional_instructions: MessagesLike,
+    /** Custom condenser */
+    condenser: (persona: Persona) => void,
 }
 
 export type DeltaCallback = (delta: string) => void;
@@ -152,7 +154,6 @@ export class Persona {
         return message.content;
     }
 
-
     async respond(api: OpenAI, message: MessageLike): Promise<string>;
     async respond(api: OpenAI, message: MessageLike, deltaCallback: DeltaCallback): Promise<string>;
     async respond(api: OpenAI, message: MessageLike, options: Partial<PersonaResponseOptions>): Promise<string>;
@@ -192,14 +193,20 @@ export class Persona {
             throw e;
         }
         
-        this.condense();
+        const condenser = options.condenser ?? ((persona) => { persona.condense(); });
+        condenser(this);
+
         return res_str;
+    }
+
+    isContextTooLong(): boolean {
+        return this.max_context_token_count < this.token_count;
     }
 
     /**
      * Condenses the history by removing oldest entries.
      */
-    condense(): void {
+    condense(): boolean {
         const max_context_token_count = this.max_context_token_count;
         let token_count: number = this.token_count;
 
@@ -211,6 +218,8 @@ export class Persona {
         }
 
         this._history.splice(0, i);
+
+        return i !== 0;
     }
 
     toJSON() {
