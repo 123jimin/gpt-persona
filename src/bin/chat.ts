@@ -39,8 +39,9 @@ if(!api_key) {
 
 /* Prepare persona definition */
 import * as fs from 'node:fs/promises';
+import * as url from 'node:url';
 
-let persona_def = "You are a chat application named `gpt-chat`, written in TypeScript.";
+let persona_def: string = "";
 
 try {
     const persona_path: string|undefined = args.persona;
@@ -56,6 +57,9 @@ try {
         }
 
         persona_def = persona_file_json ?? persona_file_contents.replace(/\r/g, '');
+    } else {
+        const default_persona_path = path.join(path.dirname(url.fileURLToPath(import.meta.url)), "../../persona/gpt-chat.txt");
+        persona_def = (await fs.readFile(default_persona_path, 'utf-8')).trim();
     }
 } catch(e) {
     if(e instanceof Error) console.error(e.stack);
