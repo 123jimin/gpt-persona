@@ -1,23 +1,24 @@
 # gpt-persona
 
-![npm](https://img.shields.io/npm/v/gpt-persona?style=flat-square)
+[![npm](https://img.shields.io/npm/v/gpt-persona?style=flat-square)](https://npmjs.org/package/gpt-persona)
 ![GitHub](https://img.shields.io/github/license/123jimin/gpt-persona?style=flat-square)
 
-A helper library in TypeScript for easily using OpenAI Chat API.
+A small library in TypeScript for managing different "persona"s for OpenAI's GPT API.
+
+Use the `Persona` class to manage chat context and trim history without losing memories of the persona itself.
 
 ```text
 npm install gpt-persona
 ```
 
-This library is not ready for production, but you may use this to experiment with a chatbot.
-
-This library includes two things:
+This library includes three features, with `Persona` being the main feature.
 
 * A class `Persona` for managing different personas for OpenAI Chat API.
 * A thin wrapper `OpenAI` around OpenAI Chat API.
   * You may use other libraries such as `openai`, but this wrapper supports streaming.
+* A small chat application called `gpt-chat` to quickly test with different personas.
 
-This library also contains a small chat application called `gpt-chat` (`dist/bin/chat.js`). Set the `OPENAI_API_KEY` environment variable with your OpenAI API key.
+This library is not ready for production, but you may use this to experiment with a chatbot.
 
 ## Example
 
@@ -95,9 +96,13 @@ Every request to the OpenAI API will be ended with this. Default role is `system
 
 It's usually better to provide instructions as `Persona#persona` and leave `Persona#instructions` empty.
 
+#### `Persona#token_count`
+
+\# of tokens for current context (`== this.persona_token_count + this.history_token_count + this.instruction_token_count`).
+
 #### `Persona#max_context_token_count`
 
-Maximum allowed \# of tokens for the context (persona + instructions + history).
+Maximum allowed \# of tokens for the context.
 
 #### `async Persona#respond(api, message, options, deltaCallback)`
 
@@ -112,6 +117,8 @@ Create a response given a message; it automatically rollbacks upon an error, so 
   * `options.additional_instructions`
     * Additional instructions to be provided.
     * Consider it as one-time `persona.instruction`.
+  * `options.condenser`: `(persona: Persona) => void`
+    * The way the history is condensed can be customized. (See `Persona#condense()` for a bit more details.)
 * `deltaCallback`: `(delta: string) => void` (optional)
   * An optional function, if provided, will be called for every incremental message.
 
@@ -134,6 +141,20 @@ const response = await persona.respond(api, "Who are you?", {}, function (delta)
 #### `Persona#condense()`
 
 Condenses the history. Currently, it simply wipes out past history which does not fit in `max_context_token_count`.
+
+##### Custom condenser
+
+Following alternatives may be used (and provided to `options.condenser` above, for example):
+
+* Wipe out random messages.
+* Use ellipses to shorten messages.
+* Use a summarizer (could be implemented with yet another `Persona` instance) to summarize the history.
+
+Use `persona.history = ...`, and do not modify `history` in-situ like `persona.history.splice(...)`.
+
+Use the exported `countTokens` method to count tokens of message(s).
+
+Use `persona.token_count - persona.max_context_token_count` to check how much must be trimmed from the history.
 
 #### `Persona#clearHistory()`
 
