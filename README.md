@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/gpt-persona?style=flat-square)](https://npmjs.org/package/gpt-persona)
 ![GitHub](https://img.shields.io/github/license/123jimin/gpt-persona?style=flat-square)
 
-A small library in TypeScript for managing different "persona"s for OpenAI's GPT API.
+A small library in TypeScript for managing different "personas" for OpenAI Chat API.
 
 Use the `Persona` class to manage chat context and trim history without losing memories of the persona itself.
 
@@ -117,6 +117,8 @@ Create a response given a message; it automatically rollbacks upon an error, so 
   * `options.additional_instructions`
     * Additional instructions to be provided.
     * Consider it as one-time `persona.instruction`.
+  * `options.freeze_history`
+    * History will be not modified when this is set to true.
   * `options.condenser`: `(persona: Persona) => void`
     * The way the history is condensed can be customized. (See `Persona#condense()` for a bit more details.)
 * `deltaCallback`: `(delta: string) => void` (optional)
