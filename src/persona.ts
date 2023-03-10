@@ -27,6 +27,8 @@ export interface PersonaResponseOptions {
     request_params: Partial<ChatCompletionParams>,
     /** One-time additional instructions. */
     additional_instructions: MessagesLike,
+    /** Whether to revert history to previous state. */
+    freeze_history: boolean,
     /** Custom condenser */
     condenser: (persona: Persona) => void,
 }
@@ -179,9 +181,15 @@ export class Persona {
         } else {
             options = options;
         }
+        
+        const condenser = options.condenser ?? ((persona) => { persona.condense(); });
 
         try {
             this.pushMessage(message);
+            if(this.isContextTooLong()) {
+                // TODO: pre-condense
+            }
+
             const res = await api.chatCompletion(this.getAPIMessages(options?.additional_instructions), options?.request_params, deltaCallback ? (msg, ind) => {
                 if(deltaCallback && ind === 0 && msg.content) deltaCallback(msg.content);
             } : void 0);
@@ -192,8 +200,12 @@ export class Persona {
             this._history_token_count = prev_history_tokens;
             throw e;
         }
+
+        if(options.freeze_history) {
+            this._history.splice(prev_history_len);
+            this._history_token_count = prev_history_tokens;
+        }
         
-        const condenser = options.condenser ?? ((persona) => { persona.condense(); });
         condenser(this);
 
         return res_str;
