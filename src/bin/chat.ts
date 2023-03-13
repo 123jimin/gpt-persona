@@ -119,6 +119,16 @@ main_loop: while(true) {
                 }
                 break;
             }
+            case 'count':
+            case 'token':
+            case 'tokens': {
+                const fixed_count = persona.persona_token_count + persona.instruction_token_count;
+                const max_history_count = persona.max_context_token_count - fixed_count;
+                const available_count = max_history_count - persona.history_token_count;
+                console.log(`Available: ${available_count} (fixed ${fixed_count} + history ${persona.history_token_count} of ${persona.max_context_token_count})`);
+                console.log(`Fixed: persona ${persona.persona_token_count} + instruction ${persona.instruction_token_count}`);
+                break;
+            }
         }
         continue main_loop;
     }

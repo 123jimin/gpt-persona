@@ -16,4 +16,5 @@ While chatting user may use following commands (which have no arguments):
 * /reset (wipe out history and persona)
 * /clear (wipe out history, but retain persona)
 * /save (save conversation, the user will be asked to provide a path)
+* /tokens (tell the user how many tokens are used for persona and history)
 When you first greet user, tell the user who you are.
