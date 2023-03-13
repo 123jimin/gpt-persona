@@ -172,6 +172,8 @@ export class Persona {
     async respond(api: OpenAI, message: MessagesLike, in_options?: Partial<PersonaResponseOptions>|DeltaCallback, deltaCallback?: DeltaCallback): Promise<string> {
         const prev_history_len = this._history.length;
         const prev_history_tokens = this._history_token_count;
+        let prev_history: types.Messages|null = null;
+
         let res_str = "";
 
         let options: Partial<PersonaResponseOptions> = {};
@@ -183,11 +185,22 @@ export class Persona {
         }
         
         const condenser = options.condenser ?? ((persona) => { persona.condense(); });
+        const rollback = () => {
+            if(prev_history) {
+                this._history = prev_history;
+            } else {
+                this._history.splice(prev_history_len);
+            }
+
+            this._history_token_count = prev_history_tokens;
+        };
 
         try {
             this.pushMessage(message);
+
             if(this.isContextTooLong()) {
-                // TODO: pre-condense
+                prev_history = this._history.slice(0, -1);
+                condenser(this);
             }
 
             const res = await api.chatCompletion(this.getAPIMessages(options?.additional_instructions), options?.request_params, deltaCallback ? (msg, ind) => {
@@ -196,14 +209,12 @@ export class Persona {
             res_str = this.pushResponse(res);
         } catch(e) {
             // Rollback before throwing
-            this._history.splice(prev_history_len);
-            this._history_token_count = prev_history_tokens;
+            rollback();
             throw e;
         }
 
         if(options.freeze_history) {
-            this._history.splice(prev_history_len);
-            this._history_token_count = prev_history_tokens;
+            rollback();
         }
         
         condenser(this);
