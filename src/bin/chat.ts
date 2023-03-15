@@ -1,4 +1,4 @@
-#!node --no-warnings
+#!/usr/bin/env node --no-warnings
 
 /* Parse arguments */
 import * as path from 'node:path';

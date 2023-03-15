@@ -1,6 +1,6 @@
 {
   "name": "gpt-persona",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A small library for managing different \"personas\" for OpenAI Chat API.",
   "files": [
     "/dist",
@@ -40,10 +40,10 @@
   "homepage": "https://github.com/123jimin/gpt-persona#readme",
   "devDependencies": {
     "@types/argparse": "^2.0.10",
-    "@types/node": "^18.13.0",
-    "@typescript-eslint/eslint-plugin": "^5.50.0",
-    "@typescript-eslint/parser": "^5.50.0",
-    "eslint": "^8.33.0",
+    "@types/node": "^18.15.3",
+    "@typescript-eslint/eslint-plugin": "^5.55.0",
+    "@typescript-eslint/parser": "^5.55.0",
+    "eslint": "^8.36.0",
     "typescript": "^4.9.5"
   },
   "dependencies": {
