@@ -1,7 +1,7 @@
 import {encode as GPTEncode} from 'gpt-3-encoder';
 
 import type * as types from "./types";
-import type {OpenAI, ChatCompletionParams} from "./openai";
+import type {OpenAIInterface, ChatCompletionParams} from "./openai";
 
 export type MessageLike = string|types.Message;
 export type MessagesLike = MessageLike|MessageLike[];
@@ -156,20 +156,20 @@ export class Persona {
         return messages.filter(({role}) => role === 'assistant').map(({content}) => content).join('\n');
     }
 
-    async respond(api: OpenAI, message: MessagesLike): Promise<string>;
-    async respond(api: OpenAI, message: MessagesLike, deltaCallback: DeltaCallback): Promise<string>;
-    async respond(api: OpenAI, message: MessagesLike, options: Partial<PersonaResponseOptions>): Promise<string>;
-    async respond(api: OpenAI, message: MessagesLike, options: Partial<PersonaResponseOptions>, deltaCallback: DeltaCallback): Promise<string>;
+    async respond(api: OpenAIInterface, message: MessagesLike): Promise<string>;
+    async respond(api: OpenAIInterface, message: MessagesLike, deltaCallback: DeltaCallback): Promise<string>;
+    async respond(api: OpenAIInterface, message: MessagesLike, options: Partial<PersonaResponseOptions>): Promise<string>;
+    async respond(api: OpenAIInterface, message: MessagesLike, options: Partial<PersonaResponseOptions>, deltaCallback: DeltaCallback): Promise<string>;
 
     /**
      * Simple API for chatting.
-     * @param api The {@link OpenAI} object.
+     * @param api Any object that implements {@link OpenAIInterface}
      * @param message The message from the user.
      * @param in_options Additional options. See {@link PersonaResponseOptions}.
      * @param deltaCallback If provided, then it will be called whenever a delta for the response is available.
      * @returns The response from AI.
      */
-    async respond(api: OpenAI, message: MessagesLike, in_options?: Partial<PersonaResponseOptions>|DeltaCallback, deltaCallback?: DeltaCallback): Promise<string> {
+    async respond(api: OpenAIInterface, message: MessagesLike, in_options?: Partial<PersonaResponseOptions>|DeltaCallback, deltaCallback?: DeltaCallback): Promise<string> {
         const prev_history_len = this._history.length;
         const prev_history_tokens = this._history_token_count;
         let prev_history: types.Messages|null = null;

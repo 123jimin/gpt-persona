@@ -27,7 +27,15 @@ export interface ChatCompletionParams {
     user: string;
 }
 
-export class OpenAI {
+export interface OpenAIInterface {
+    chatCompletion(
+        messages: types.Messages,
+        params?: Readonly<Partial<ChatCompletionParams>>,
+        deltaCallback?: (delta: Partial<types.Message>, index: number) => void
+    ): Promise<types.ChoiceResponse<{message: types.Message}>>;
+}
+
+export class OpenAI implements OpenAIInterface {
     private _client: ReturnType<typeof axios.create>;
     private _config: Partial<OpenAIConfig> = {};
 
@@ -117,9 +125,11 @@ export class OpenAI {
         }
     }
 
-    async chatCompletion(messages: types.Messages, params: Readonly<Partial<ChatCompletionParams>> = {}, deltaCallback?: (delta: Partial<types.Message>, index: number) => void):
-            Promise<types.ChoiceResponse<{message: types.Message}>> {   
-                 
+    async chatCompletion(
+        messages: types.Messages,
+        params: Readonly<Partial<ChatCompletionParams>> = {},
+        deltaCallback?: (delta: Partial<types.Message>, index: number) => void
+    ): Promise<types.ChoiceResponse<{message: types.Message}>> {   
         const req_params: {stream?: boolean} & {[key: string]: unknown} = {...params};
 
         req_params.model = req_params.model || "gpt-3.5-turbo";
