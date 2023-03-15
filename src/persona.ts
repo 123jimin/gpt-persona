@@ -3,14 +3,14 @@ import {encode as GPTEncode} from 'gpt-3-encoder';
 import type * as types from "./types";
 import type {OpenAI, ChatCompletionParams} from "./openai";
 
-type MessageLike = string|types.Message;
-type MessagesLike = MessageLike|MessageLike[];
+export type MessageLike = string|types.Message;
+export type MessagesLike = MessageLike|MessageLike[];
 
-function toMessage(default_role: types.Role, message: MessageLike): types.Message {
+export function toMessage(default_role: types.Role, message: MessageLike): types.Message {
     return (typeof message === 'string') ? {role: default_role, content: message} : message;
 }
 
-function toMessages(default_role: types.Role, messages: MessagesLike): types.Messages {
+export function toMessages(default_role: types.Role, messages: MessagesLike): types.Messages {
     return Array.isArray(messages) ? messages.map((x) => toMessage(default_role, x)) : [toMessage(default_role, messages)];
 }
 
@@ -141,25 +141,25 @@ export class Persona {
      * @param response Response message.
      * @returns The message that's added to the history.
      */
-    pushResponse(response: MessageLike|types.ChoiceResponse<{message: types.Message}>): string {
-        const message = ((response): types.Message => {
+    pushResponse(response: MessagesLike|types.ChoiceResponse<{message: types.Message}>): string {
+        const messages: types.Message[] = ((response) => {
             if(typeof response === 'object' && 'choices' in response) {
-                return response.choices[0].message;
+                return [response.choices[0].message];
             } else {
-                return toMessage('assistant', response);
+                return toMessages('assistant', response);
             }
         })(response);
         
-        this.history.push(message);
-        this._history_token_count += countTokens(message);
+        this.history.push(...messages);
+        this._history_token_count += countTokens(messages);
 
-        return message.content;
+        return messages.filter(({role}) => role === 'assistant').map(({content}) => content).join('\n');
     }
 
-    async respond(api: OpenAI, message: MessageLike): Promise<string>;
-    async respond(api: OpenAI, message: MessageLike, deltaCallback: DeltaCallback): Promise<string>;
-    async respond(api: OpenAI, message: MessageLike, options: Partial<PersonaResponseOptions>): Promise<string>;
-    async respond(api: OpenAI, message: MessageLike, options: Partial<PersonaResponseOptions>, deltaCallback: DeltaCallback): Promise<string>;
+    async respond(api: OpenAI, message: MessagesLike): Promise<string>;
+    async respond(api: OpenAI, message: MessagesLike, deltaCallback: DeltaCallback): Promise<string>;
+    async respond(api: OpenAI, message: MessagesLike, options: Partial<PersonaResponseOptions>): Promise<string>;
+    async respond(api: OpenAI, message: MessagesLike, options: Partial<PersonaResponseOptions>, deltaCallback: DeltaCallback): Promise<string>;
 
     /**
      * Simple API for chatting.
