@@ -180,8 +180,8 @@ export class Persona {
 
         if(typeof in_options === 'function') {
             deltaCallback = in_options;
-        } else {
-            options = options;
+        } else if(in_options) {
+            options = in_options;
         }
         
         const condenser = options.condenser ?? ((persona) => { persona.condense(); });
