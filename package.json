@@ -1,6 +1,6 @@
 {
   "name": "gpt-persona",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A small library for managing different \"personas\" for OpenAI Chat API.",
   "files": [
     "/dist",

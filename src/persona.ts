@@ -31,6 +31,10 @@ export function countTokens(messages: MessagesLike): number {
     }
 }
 
+function messagesToString(messages: types.Message[], role_filter?: types.Role) {
+    return (role_filter ? messages.filter(({role}) => role === role_filter) : messages).map(({content}) => content).join('\n');
+}
+
 export interface PersonaResponseOptions {
     /** The same parameters for {@link https://platform.openai.com/docs/api-reference/chat/create the OpenAI API}. */
     request_params: Partial<ChatCompletionParams>,
@@ -158,7 +162,7 @@ export class Persona {
         this.history.push(...messages);
         this._history_token_count += countTokens(messages);
 
-        return messages.filter(({role}) => role === 'assistant').map(({content}) => content).join('\n');
+        return messagesToString(messages, 'assistant');
     }
 
     async respond(api: OpenAIInterface, message: MessagesLike): Promise<string>;
@@ -219,6 +223,7 @@ export class Persona {
 
             if(options.isEphemeral && options.isEphemeral(messages)) {
                 do_rollback = true;
+                res_str = messagesToString(messages, 'assistant');
             } else {
                 res_str = this.pushResponse(messages);
             }

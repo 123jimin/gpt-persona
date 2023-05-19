@@ -1,4 +1,4 @@
-export type Role = 'system'|'user'|'assistant';
+export type Role = 'system'|'user'|'assistant'|'tool';
 export type Message = {role: Role, name?: string, content: string};
 export type Messages = Message[];
 export type Choice<T> = T & {

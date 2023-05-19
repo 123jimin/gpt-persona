@@ -121,7 +121,7 @@ Create a response given a message; it automatically rollbacks upon an error, so 
     * History will be not modified when this is set to true.
   * `options.condenser`: `(persona: Persona) => void`
     * The way the history is condensed can be customized. (See `Persona#condense()` for a bit more details.)
-  * `options.isEphemeral`: `(messages: types.Message[]) => boolean`
+  * `options.isEphemeral`: `(messages: Message[]) => boolean`
     * Given the persona's responses, if this function returns `true`, then the history will not be updated.
 * `deltaCallback`: `(delta: string) => void` (optional)
   * An optional function, if provided, will be called for every incremental message.
