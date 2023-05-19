@@ -149,6 +149,7 @@ export class OpenAI implements OpenAIInterface {
 
                     if(choice.finish_reason) curr_data.finish_reason = choice.finish_reason;
                     if(delta.role) curr_data.message.role = delta.role;
+                    if(delta.name) curr_data.message.name = delta.name;
                     if(delta.content) curr_data.message.content += delta.content;
 
                     deltaCallback(delta, index);
