@@ -10,8 +10,17 @@ export function toMessage(default_role: types.Role, message: MessageLike): types
     return (typeof message === 'string') ? {role: default_role, content: message} : message;
 }
 
-export function toMessages(default_role: types.Role, messages: MessagesLike): types.Messages {
-    return Array.isArray(messages) ? messages.map((x) => toMessage(default_role, x)) : [toMessage(default_role, messages)];
+export function toMessages(default_role: types.Role, messages: MessagesLike|types.ChoiceResponse<{message: types.Message}>, choicePicker?: (response: types.ChoiceResponse<{message: types.Message}>) => types.Message): types.Messages {
+    if(typeof messages === 'object' && 'choices' in messages) {
+        choicePicker = choicePicker || function (response){ return response.choices[0].message; };
+        return [choicePicker(messages)];
+    }
+
+    if(Array.isArray(messages)) {
+        return messages.map((x) => toMessage(default_role, x));
+    }
+    
+    return [toMessage(default_role, messages)];
 }
 
 export function countTokens(messages: MessagesLike): number {
@@ -31,6 +40,8 @@ export interface PersonaResponseOptions {
     freeze_history: boolean,
     /** Custom condenser */
     condenser: (persona: Persona) => void,
+    /** Whether to discard current message */
+    isEphemeral: (messages: types.Message[]) => boolean,
 }
 
 export type DeltaCallback = (delta: string) => void;
@@ -142,13 +153,7 @@ export class Persona {
      * @returns The message that's added to the history.
      */
     pushResponse(response: MessagesLike|types.ChoiceResponse<{message: types.Message}>): string {
-        const messages: types.Message[] = ((response) => {
-            if(typeof response === 'object' && 'choices' in response) {
-                return [response.choices[0].message];
-            } else {
-                return toMessages('assistant', response);
-            }
-        })(response);
+        const messages: types.Message[] = toMessages('assistant', response);
         
         this.history.push(...messages);
         this._history_token_count += countTokens(messages);
@@ -185,6 +190,9 @@ export class Persona {
         }
         
         const condenser = options.condenser ?? ((persona) => { persona.condense(); });
+        const choicePicker = (response: types.ChoiceResponse<{message: types.Message}>) => response.choices[0].message;
+        
+        let do_rollback = false;
         const rollback = () => {
             if(prev_history) {
                 this._history = prev_history;
@@ -206,14 +214,21 @@ export class Persona {
             const res = await api.chatCompletion(this.getAPIMessages(options?.additional_instructions), options?.request_params, deltaCallback ? (msg, ind) => {
                 if(deltaCallback && ind === 0 && msg.content) deltaCallback(msg.content);
             } : void 0);
-            res_str = this.pushResponse(res);
+            
+            const messages: types.Message[] = toMessages('assistant', res, choicePicker);
+
+            if(options.isEphemeral && options.isEphemeral(messages)) {
+                do_rollback = true;
+            } else {
+                res_str = this.pushResponse(messages);
+            }
         } catch(e) {
             // Rollback before throwing
             rollback();
             throw e;
         }
 
-        if(options.freeze_history) {
+        if(do_rollback || options.freeze_history) {
             rollback();
         }
         
